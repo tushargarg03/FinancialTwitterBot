@@ -12,4 +12,3 @@ client = tweepy.Client(
 def tweet(s: str):
     client.create_tweet(text= s)
     print("Tweet Successful!")
-    #testing push
