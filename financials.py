@@ -9,9 +9,9 @@ sp500 = round(si.get_live_price("^GSPC"),2)
 nasdaq = round(si.get_live_price("^IXIC"),2)
 dow = round(si.get_live_price("^DJI"),2)
 
+#following two functions: strings returned for the market gainers/losers tweets
 def market_gainers():
     data = si.get_day_gainers().head(5)
-
     result = "Largest Gains 📈:\n" 
 
     for i in range(5):
@@ -21,15 +21,12 @@ def market_gainers():
 
 def market_losers():
     data = si.get_day_losers().head(5)
-
     result = "Largest Losses 📉:\n" #maybe add in the time of tweet or something
 
     for i in range(5):
          result += f'${data.iloc[i][0]}  ->  {data.iloc[i][4]} %\n'
 
     return result
-
-tweet.tweet(market_losers())
     
 #returns the string of the indices level and the changes for the tweet
 def indices_update():
@@ -55,9 +52,6 @@ def company_gen_info(company_ticker: str):
     result +=  company_ticker +  " -> " + all_data.get("shortName") +"\n"
     result += "Industry: " + all_data.get("industry") + "\n"
     result += "Sector: " + all_data.get("sector") + "\n"
-
-    #make this into own function for company overview
-    #result += summarizer(all_data.get("longBusinessSummary"), 1) + "\n"
 
     #financials begin here
     result += "\nRevenue: $" + format_financials(all_data.get("totalRevenue")) + "\n"
