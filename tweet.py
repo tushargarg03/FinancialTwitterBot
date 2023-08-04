@@ -1,5 +1,6 @@
 import tweepy
 
+#tweet functionality
 client = tweepy.Client(
     bearer_token= 'AAAAAAAAAAAAAAAAAAAAAC3ZoAEAAAAAMSmY%2F09ii%2BNsqjTGN11VfY610t0%3D2BMoleZZI9bhBYOc8Nia2GwJ1LR9QOyUdcWWwn14xH38ORCkqx',
     consumer_key='XMhmSGnaz2fqdWjmEGOiI5G6X',
