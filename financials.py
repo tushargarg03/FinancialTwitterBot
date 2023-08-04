@@ -4,13 +4,18 @@ import meaningcloud
 import tweet
 import datetime
 
+#indices levels
+sp500 = round(si.get_live_price("^GSPC"),2)
+nasdaq = round(si.get_live_price("^IXIC"),2)
+dow = round(si.get_live_price("^DJI"),2)
+
 def market_gainers():
     data = si.get_day_gainers().head(5)
 
     result = "Largest Gains 📈:\n" 
 
     for i in range(5):
-        result += "$" + data.iloc[i][0] + " -> " + str(data.iloc[i][4]) +'%\n'
+        result += f'${data.iloc[i][0]}  ->  {data.iloc[i][4]} %\n'
 
     return result
 
@@ -20,58 +25,22 @@ def market_losers():
     result = "Largest Losses 📉:\n" #maybe add in the time of tweet or something
 
     for i in range(5):
-        result += "$" + data.iloc[i][0] + " -> " + str(data.iloc[i][4]) +'%\n'
+         result += f'${data.iloc[i][0]}  ->  {data.iloc[i][4]} %\n'
 
     return result
-    
-# price_INDEX returns the current price of the specified index while change_INDEX
-# returns the percent change of that index
 
-def price_sp500():
-    data = si.get_live_price("^GSPC")
-    return round(data,2)
-
-def price_nasdaq():
-    data = si.get_live_price("^DJI")
-    return round(data,2)
-
-def price_dow():
-    data = si.get_live_price("^IXIC")
-    return round(data,2)
-
-def change_sp500():
-    data = si.get_data("^GSPC")  
-    curr = price_sp500()
-    prev = data['close'][-2]  
+tweet.tweet(market_losers())
     
-    change = (curr - prev) / prev * 100
-    
-    return round(change,2)
-
-def change_nasdaq():
-    data = si.get_data("^DJI")  
-    curr = price_nasdaq()
-    prev = data['close'][-2]  
-    
-    change = (curr - prev) / prev * 100
-    
-    return round(change,2)
-
-def change_dow(): 
-    data = si.get_data("^IXIC")
-    curr = price_dow()
-    prev = data['close'][-2]  
-    
-    change = (curr - prev) / prev * 100
-    
-    return round(change,2)
-
-#returns the string of the indices level for the tweet
-def make_tweet():
+#returns the string of the indices level and the changes for the tweet
+def indices_update():
     result = "Indices Levels:\n"
-    result += "$SPX -->  " + str(price_sp500()) + " (" + str(change_sp500()) + "%)\n" 
-    result += "$NDX -->  " + str(price_nasdaq()) + " (" + str(change_nasdaq()) + "%)\n"
-    result += "$DJI -->  " + str(price_dow()) + " (" + str(change_dow()) + "%)"
+    sp500_change = round((sp500 - si.get_data("^GSPC")['close'][-2]) / si.get_data("^GSPC")['close'][-2] * 100,2)
+    nasdaq_change = round((nasdaq - si.get_data("^IXIC")['close'][-2]) / si.get_data("^IXIC")['close'][-2] * 100,2)
+    dow_change = round((dow - si.get_data("^DJI")['close'][-2]) / si.get_data("^DJI")['close'][-2] * 100,2)
+
+    result += f"$SPX -->  {sp500} ({sp500_change}%)\n" 
+    result += f"$NDX -->  {nasdaq} ({nasdaq_change}%)\n" 
+    result += f"$DJI -->  {dow} ({dow_change}%)\n" 
 
     return result
 
