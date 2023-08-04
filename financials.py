@@ -3,6 +3,7 @@ import yfinance as yf
 import meaningcloud
 import tweet
 import datetime
+import helpers
 
 #indices levels
 sp500 = round(si.get_live_price("^GSPC"),2)
@@ -27,7 +28,19 @@ def market_losers():
          result += f'${data.iloc[i][0]}  ->  {data.iloc[i][4]} %\n'
 
     return result
-    
+
+def most_active():
+    data = si.get_day_most_active().head(5)
+    result = "Most Active 💥:\n"
+
+    print(data)
+
+    for i in range(5):
+        volume_formatted = helpers.format_financials(data.iloc[i]['Volume'])  # Format the individual volume value
+        result += f"${data.iloc[i][0]}  ->  {volume_formatted}  ->  {data.iloc[i][4]}% \n"
+
+    return result
+
 #returns the string of the indices level and the changes for the tweet
 def indices_update():
     result = "Indices Levels:\n"
@@ -69,36 +82,5 @@ def company_gen_info(company_ticker: str):
 def company_summarizer(company_ticker: str):
     text = yf.Ticker(company_ticker[1:]).info.get("longBusinessSummary")
         
-    return company_ticker + "\n" + summarizer(text, 1)
+    return company_ticker + "\n" + helpers.summarizer(text, 1)
        
-#helper function to evaluate financial formatting
-def format_financials(number: int):
-
-    if number == None:
-        return "Unable to calculate"
-
-    if number >= 1000000000000:
-        number /= 1000000000000
-        return str("{:.2f}".format(number)) + "T"
-    elif number < 1000000000000 and number >=1000000000:
-        number /= 1000000000
-        return str("{:.2f}".format(number)) + "B"
-    elif number >= 1000000 and number < 1000000000:
-        number /= 1000000
-        return str("{:.2f}".format(number)) + "M"
-    elif number >= 1000 and number <= 1000000:
-        number /= 1000
-        return str("{:.2f}".format(number)) + "K"
-    else:
-        return str(number)
-
-#using meaningcloud api, this summarizes the text into the number of sentences asked
-def summarizer(text: str, sent_count: int):
-    if text == None or sent_count <= 0:
-        return None
-
-    license_key = '850273e65344d5b390b42477a65b5d69'
-
-    text_summarized = meaningcloud.SummarizationResponse(meaningcloud.SummarizationRequest(key= license_key, txt= text, sentences= sent_count).sendReq())
-
-    return text_summarized.getSummary()
