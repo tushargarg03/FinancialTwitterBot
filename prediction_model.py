@@ -27,7 +27,7 @@ def create_dataset(data, look_back=1):
         Y.append(data[i + look_back])
     return np.array(X), np.array(Y)
 
-# Set the ticker symbol of the stock you want to predict
+# Set the ticker symbol of the stock you want to predic
 ticker = "AAPL"
 
 # Download historical stock data from Yahoo Finance
