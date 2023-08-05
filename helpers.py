@@ -1,7 +1,10 @@
+import meaningcloud
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-
-#helper function to evaluate financial formatting
+#helper function to evaluate financial formatting for tweets
 def format_financials(number: int):
 
     if number == None:
@@ -22,13 +25,13 @@ def format_financials(number: int):
     else:
         return str(number)
     
-    #using meaningcloud api, this summarizes the text into the number of sentences asked
+#using meaningcloud api, this summarizes the text into the number of sentences asked
 def summarizer(text: str, sent_count: int):
 
     if text == None or sent_count <= 0:
         return None
 
-    license_key = '850273e65344d5b390b42477a65b5d69'
+    license_key = os.getenv("meaningcloud_license_key")
 
     text_summarized = meaningcloud.SummarizationResponse(meaningcloud.SummarizationRequest(key= license_key, txt= text, sentences= sent_count).sendReq())
 

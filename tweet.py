@@ -1,12 +1,16 @@
 import tweepy
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 #tweet functionality
 client = tweepy.Client(
-    bearer_token= 'AAAAAAAAAAAAAAAAAAAAAC3ZoAEAAAAAMSmY%2F09ii%2BNsqjTGN11VfY610t0%3D2BMoleZZI9bhBYOc8Nia2GwJ1LR9QOyUdcWWwn14xH38ORCkqx',
-    consumer_key='XMhmSGnaz2fqdWjmEGOiI5G6X',
-    consumer_secret='msvcyiv6SP1lCpC9iDm4p9gxKiUT9nmjT2t7PFaEyU1gJ7Gr1E',
-    access_token='1669412065289617428-35KJKPnMkQuThXBXVggObKx7TttfGe',
-    access_token_secret='SPLg2BJsM3pheCzEOkv4wMGWdA27IuH7KmBWeadNCzdDy'
+    bearer_token= os.getenv('bearer_token'), 
+    consumer_key= os.getenv('consumer_key'),
+    consumer_secret= os.getenv('consumer_secret'),
+    access_token= os.getenv('access_token'),
+    access_token_secret= os.getenv('access_token_secret')
 )
 
 #Takes in a string and tweets it out, basic for now but need to check for failures and stuff like that

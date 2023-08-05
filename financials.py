@@ -83,4 +83,3 @@ def company_summarizer(company_ticker: str):
     text = yf.Ticker(company_ticker[1:]).info.get("longBusinessSummary")
         
     return company_ticker + "\n" + helpers.summarizer(text, 1)
-       

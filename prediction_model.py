@@ -7,9 +7,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense
 import matplotlib.pyplot as plt
 
-# Rest of the code remains the same...
-
-
 # Set a random seed for reproducibility
 np.random.seed(42)
 tf.random.set_seed(42)
