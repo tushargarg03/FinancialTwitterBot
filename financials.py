@@ -10,7 +10,7 @@ sp500 = round(si.get_live_price("^GSPC"),2)
 nasdaq = round(si.get_live_price("^IXIC"),2)
 dow = round(si.get_live_price("^DJI"),2)
 
-#following two functions: strings returned for the market gainers/losers tweets
+#following three functions: strings returned for the gainers/losers/active tweets
 def market_gainers():
     data = si.get_day_gainers().head(5)
     result = "Largest Gains 📈:\n" 

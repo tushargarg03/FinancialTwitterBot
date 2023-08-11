@@ -1,98 +1,46 @@
+from sklearn.preprocessing import MinMaxScaler
+from torch.utils.data import DataLoader, TensorDataset
 import yfinance as yf
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-from sklearn.preprocessing import MinMaxScaler
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense
-import matplotlib.pyplot as plt
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
 
-# Set a random seed for reproducibility
-np.random.seed(42)
-tf.random.set_seed(42)
+#Historical sp500 data
+df_sp500 = yf.download("^GSPC", start= "2023-01-01", end= "2023-08-04")
 
-# Function to download stock data from Yahoo Finance
-def download_stock_data(ticker, start_date, end_date):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    return data
+#calculate and add 5 day SMA/volume to dataframe. Remove NaN data
+window_size = 5
+df_sp500["5 Day SMA"] = df_sp500['Close'].rolling(window=window_size).mean()
+df_sp500["5 Day Average Volume"] = df_sp500['Volume'].rolling(window=window_size).mean()
+df_sp500.dropna(inplace=True)
 
-# Function to create the dataset for training the RNN
-def create_dataset(data, look_back=1):
-    X, Y = [], []
-    for i in range(len(data) - look_back):
-        X.append(data[i:(i + look_back)])
-        Y.append(data[i + look_back])
-    return np.array(X), np.array(Y)
+#scale the data
+scaler = MinMaxScaler()
+df_sp500[['Open', '5 Day Average Volume', '5 Day SMA', 'Close']] = scaler.fit_transform(df_sp500[['Open', '5 Day Average Volume', '5 Day SMA', 'Close']])
 
-# Set the ticker symbol of the stock you want to predic
-ticker = "AAPL"
+#split into input and output for tensor creation
+input_data = df_sp500[['Open', '5 Day Average Volume', '5 Day SMA']]
+output_data = df_sp500[['Close']]
 
-# Download historical stock data from Yahoo Finance
-start_date = "2020-01-01"
-end_date = "2023-01-01"
-data = download_stock_data(ticker, start_date, end_date)
+#create 70% train size then the test size
+train_size = int(.7 * len(input_data))
 
-# Extract the "Close" price for prediction
-close_prices = data['Close'].values.reshape(-1, 1)
+train_input = input_data[:train_size]
+train_target = output_data[:train_size]
+test_input = input_data[train_size:]
+test_target = output_data[train_size:]
 
-# Normalize the data using MinMaxScaler
-scaler = MinMaxScaler(feature_range=(0, 1))
-close_prices_normalized = scaler.fit_transform(close_prices)
+#Convert to tensors
+train_input_tensor = torch.tensor(train_input.values, dtype=torch.float32)
+train_target_tensor = torch.tensor(train_target.values, dtype=torch.float32)
+test_input_tensor = torch.tensor(test_input.values, dtype=torch.float32)
+test_target_tensor = torch.tensor(test_target.values, dtype=torch.float32)
 
-# Split data into training and test sets (80-20 split)
-train_size = int(len(close_prices_normalized) * 0.8)
-test_size = len(close_prices_normalized) - train_size
-train_data, test_data = close_prices_normalized[:train_size, :], close_prices_normalized[train_size:, :]
+print(train_input_tensor.shape)
+print(train_target_tensor.shape)
+print(test_input_tensor.shape)
+print(test_target_tensor.shape)
 
-# Create the dataset for training the RNN
-look_back = 10  # Number of previous time steps to use for prediction
-X_train, y_train = create_dataset(train_data, look_back)
-X_test, y_test = create_dataset(test_data, look_back)
-
-# Reshape input data to fit the LSTM layer (samples, time steps, features)
-X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
-
-# Build the RNN model
-model = Sequential()
-model.add(LSTM(units=50, return_sequences=True, input_shape=(look_back, 1)))
-model.add(LSTM(units=50))
-model.add(Dense(units=1))
-model.compile(optimizer='adam', loss='mean_squared_error')
-
-# Train the RNN model
-model.fit(X_train, y_train, epochs=100, batch_size=32, verbose=1)
-
-# Evaluate the model on the test data
-loss = model.evaluate(X_test, y_test, verbose=0)
-print(f"Test loss: {loss}")
-
-# Make predictions on the test data
-y_pred = model.predict(X_test)
-
-# Inverse transform the normalized predictions and ground truth data to get actual stock prices
-y_pred_actual = scaler.inverse_transform(y_pred)
-y_test_actual = scaler.inverse_transform(y_test)
-
-# Calculate the Root Mean Squared Error (RMSE)
-rmse = np.sqrt(np.mean((y_pred_actual - y_test_actual) ** 2))
-print(f"Root Mean Squared Error (RMSE): {rmse}")
-
-# Download historical stock data from Yahoo Finance for the entire period
-data_all = download_stock_data(ticker, start_date, end_date)
-dates_all = data_all.index
-
-# Extract dates corresponding to the test dataset
-dates_test = dates_all[train_size + look_back:]
-
-# Visualize the predictions vs actual stock prices
-plt.figure(figsize=(12, 6))
-plt.plot(dates_test, y_test_actual, label='Actual Prices', color='b')
-plt.plot(dates_test, y_pred_actual, label='Predicted Prices', color='r')
-plt.title(f"Stock Price Prediction vs Actual (RMSE: {rmse:.2f})")
-plt.xlabel("Date")
-plt.ylabel("Stock Price")
-plt.legend()
-plt.xticks(rotation=45)
-plt.tight_layout()
-plt.show()
