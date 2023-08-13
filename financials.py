@@ -67,9 +67,9 @@ def company_gen_info(company_ticker: str):
     result += "Sector: " + all_data.get("sector") + "\n"
 
     #financials begin here
-    result += "\nRevenue: $" + format_financials(all_data.get("totalRevenue")) + "\n"
+    result += "\nRevenue: $" + helpers.format_financials(all_data.get("totalRevenue")) + "\n"
     result += "$" + str(all_data.get("currentPrice")) + "/share -> " + format_financials(all_data.get("marketCap")) + " Market Cap\n"
-    result += "Avg. Volume: " + format_financials(all_data.get("averageVolume"))
+    result += "Avg. Volume: " + helpers.format_financials(all_data.get("averageVolume"))
     
     #dividend checker
     if all_data.get("dividendYield") is not None:
